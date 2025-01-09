@@ -1,0 +1,137 @@
+<!-- Created By Logan Stoltz -->
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Space Invaders</title>
+    <style></style>
+</head>
+
+<body>
+    <canvas id="gameCanvas" width="1000" height="800"></canvas>
+    <script>
+
+    /************* CONSTANTS *************/
+    // Game Constants
+    const FPS = 30; // Frames per Second
+    const SHIP_SIZE = 30; // Ship height in pixel
+    const SHIP_SPEED = 5; // Acceleration of the ship in pixel per second
+
+    /************* GAME SETUP *************/
+    /** @type {HTMLCanvasElement} */
+    var canvas = document.getElementById("gameCanvas");
+    var context = canvas.getContext("2d");
+
+    // Set up the game parameters
+    var ship;
+    newGame();
+
+    // Event Hanlders for user inputs
+    document.addEventListener("keydown", keyDown);
+    document.addEventListener("keyup", keyUp);
+
+    // Set up the game loop
+    setInterval(update, 1000 / FPS);
+
+
+    /************* FUNCTIONS *************/
+    function newShip() {
+        return{
+            x: canvas.width / 2,
+            y: canvas.height * 0.9,
+            radius: SHIP_SIZE / 2,
+            thrustingLeft: false,
+            thrustingRight: false,
+            thrust: {
+                x: 0
+            }
+        }
+    }
+
+    function drawShip(x, y, color = "green") {
+        context.strokeStyle = color;
+        context.lineWidth = SHIP_SIZE / 20;
+        context.fillStyle = "green";
+        context.beginPath(); // Front middle of ship
+        context.moveTo( // Front Right of ship
+            x + SHIP_SIZE - 5,
+            y + 0
+        );
+        context.lineTo( // Rear Right of ship
+            x + SHIP_SIZE,
+            y + SHIP_SIZE / 1.2
+        );
+        context.lineTo( // Rear Left of ship
+            x - SHIP_SIZE,
+            y + SHIP_SIZE / 1.2
+        );
+        context.lineTo( // Front left of ship
+            x - SHIP_SIZE + 5,
+            y + 0
+        );
+        context.closePath();
+        context.fill();
+
+        // Ship Gun
+        context.lineTo( // Back Left of Gun
+            x - 4,
+            y + 0
+        );
+        context.lineTo( // Middle Front of Gun
+            x + 0,
+            y - SHIP_SIZE / 4
+        );
+        context.lineTo( // Back Right of Gun
+            x + 4,
+            y + 0
+        );
+        context.closePath();
+        context.fill();
+        context.stroke();
+    }
+
+    function keyDown(/** @type {KeyboardEvent}*/ event) {
+        switch(event.keyCode){
+            case 32: // space bar (Shoot laser)
+                //shootLaser();
+                break;
+            case 37: // left arrow (move ship left)
+                break;
+            case 39: // right arrow (rotate ship right)
+                break;
+        }
+    }
+
+    function keyUp(/** @type {KeyboardEvent}*/ event) {
+        switch(event.keyCode){
+            case 32: // space bar (allow shooting again)
+                break;
+            case 37: // left arrow (stop moving ship left)
+                break;
+            case 39: // right arrow (stop moving ship right)
+                break;
+        }
+    }
+
+    function newGame() {
+        ship = newShip();
+    }
+
+    function update() {
+    
+        // Draw background (space)
+        context.fillStyle = "black";
+        context.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Move the ship side to side TODO
+
+        // Draw Ship
+        drawShip(ship.x, ship.y);
+    }
+
+    </script>
+</body>
+
+</html>
