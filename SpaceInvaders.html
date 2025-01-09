@@ -15,9 +15,9 @@
 
     /************* CONSTANTS *************/
     // Game Constants
-    const FPS = 30; // Frames per Second
+    const FPS = 60; // Frames per Second
     const SHIP_SIZE = 30; // Ship height in pixel
-    const SHIP_SPEED = 5; // Acceleration of the ship in pixel per second
+    const SHIP_SPEED = 500; // Acceleration of the ship in pixel per second
 
     /************* GAME SETUP *************/
     /** @type {HTMLCanvasElement} */
@@ -98,8 +98,10 @@
                 //shootLaser();
                 break;
             case 37: // left arrow (move ship left)
+                ship.thrustingLeft = true;
                 break;
             case 39: // right arrow (rotate ship right)
+                ship.thrustingRight = true;
                 break;
         }
     }
@@ -108,9 +110,11 @@
         switch(event.keyCode){
             case 32: // space bar (allow shooting again)
                 break;
-            case 37: // left arrow (stop moving ship left)
+                case 37: // left arrow (move ship left)
+                ship.thrustingLeft = false;
                 break;
-            case 39: // right arrow (stop moving ship right)
+            case 39: // right arrow (rotate ship right)
+                ship.thrustingRight = false;
                 break;
         }
     }
@@ -125,10 +129,23 @@
         context.fillStyle = "black";
         context.fillRect(0, 0, canvas.width, canvas.height);
 
-        // Move the ship side to side TODO
+        // Move the ship side to side
+        if(ship.thrustingLeft) {
+            ship.thrust.x = -SHIP_SPEED / FPS;
+        }
+        else if(ship.thrustingRight) {
+            ship.thrust.x = SHIP_SPEED / FPS;
+        }
+        else {
+            ship.thrust.x = 0;
+        }
 
         // Draw Ship
         drawShip(ship.x, ship.y);
+
+        
+        // Move the Ship
+        ship.x += ship.thrust.x;
     }
 
     </script>
