@@ -19,13 +19,17 @@
     const SHIP_SIZE = 30; // Ship height in pixel
     const SHIP_SPEED = 500; // Acceleration of the ship in pixel per second
 
+    const ENEMY_SHIP_SIZE = 40; // Enemy height in pixels
+    const ENEMY_STARTING_X = 10; // Enemies section start x
+    const ENEMY_STARTING_Y = 10; // Enemies section start y
+
     /************* GAME SETUP *************/
     /** @type {HTMLCanvasElement} */
     var canvas = document.getElementById("gameCanvas");
     var context = canvas.getContext("2d");
 
     // Set up the game parameters
-    var ship;
+    var ship, level, levelText, levelTextAlpha;
     newGame();
 
     // Event Hanlders for user inputs
@@ -53,7 +57,7 @@
     function drawShip(x, y, color = "green") {
         context.strokeStyle = color;
         context.lineWidth = SHIP_SIZE / 20;
-        context.fillStyle = "green";
+        context.fillStyle = color;
         context.beginPath(); // Front middle of ship
         context.moveTo( // Front Right of ship
             x + SHIP_SIZE - 5,
@@ -92,6 +96,31 @@
         context.stroke();
     }
 
+    function drawEnemy(x, y, color = "white") {
+        context.strokeStyle = color;
+        context.lineWidth = ENEMY_SHIP_SIZE / 20;
+        context.fillStyle = color;
+        context.beginPath(); // Front middle of enemy
+        context.moveTo( // Front Right of enemy
+            x + ENEMY_SHIP_SIZE,
+            y + 0
+        );
+        context.lineTo( // Rear Right of enemy
+            x + ENEMY_SHIP_SIZE,
+            y + ENEMY_SHIP_SIZE
+        );
+        context.lineTo( // Rear Left of enemy
+            x + 0,
+            y + ENEMY_SHIP_SIZE
+        );
+        context.lineTo( // Front left of enemy
+            x + 0,
+            y + 0 
+        );
+        context.closePath();
+        context.fill(); 
+    }
+
     function keyDown(/** @type {KeyboardEvent}*/ event) {
         switch(event.keyCode){
             case 32: // space bar (Shoot laser)
@@ -120,7 +149,24 @@
     }
 
     function newGame() {
+        level = 0;
         ship = newShip();
+        spawnDefences();
+        newLevel();
+    }
+
+    function newLevel() {
+        levelText = "Level " + (level + 1);
+        levelTextAlpha = 1.0;
+        spawnEnemies();
+    }
+
+    function spawnDefences() {
+        // TODO
+    }
+
+    function spawnEnemies() {
+        // TODO
     }
 
     function update() {
@@ -130,22 +176,40 @@
         context.fillRect(0, 0, canvas.width, canvas.height);
 
         // Move the ship side to side
-        if(ship.thrustingLeft) {
+        if(ship.thrustingLeft && ship.x > 0 + SHIP_SIZE * 1.4) { // Logic for moving left (stopping at edge)
             ship.thrust.x = -SHIP_SPEED / FPS;
         }
-        else if(ship.thrustingRight) {
+        else if(ship.thrustingRight && ship.x < canvas.width - SHIP_SIZE * 1.4) { // Logic for moving right (stopping at edge)
             ship.thrust.x = SHIP_SPEED / FPS;
         }
-        else {
+        else { // Logic to stop moving
             ship.thrust.x = 0;
         }
+        ship.x += ship.thrust.x; // Actual Moving part
 
         // Draw Ship
         drawShip(ship.x, ship.y);
 
         
-        // Move the Ship
-        ship.x += ship.thrust.x;
+        var tempColor = "white", x = ENEMY_STARTING_X, y = ENEMY_STARTING_Y;
+        for(var i = 1; i <= 55; i ++) {
+            if (i == 1) {
+                drawEnemy(x, y, tempColor);
+                continue;
+            }
+            x += ENEMY_SHIP_SIZE * 1.2;
+            if (i == 12 || i == 23) {
+                tempColor = "yellow"
+                x = ENEMY_STARTING_X;
+                y += ENEMY_SHIP_SIZE * 1.2;
+            }
+            if(i == 34 || i == 45) {
+                tempColor = "orange"
+                x = ENEMY_STARTING_X;
+                y += ENEMY_SHIP_SIZE * 1.2
+            }
+            drawEnemy(x, y, tempColor);
+        }
     }
 
     </script>
