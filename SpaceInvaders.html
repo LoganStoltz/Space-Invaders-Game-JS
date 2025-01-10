@@ -19,7 +19,9 @@
     const SHIP_SIZE = 30; // Ship height in pixel
     const SHIP_SPEED = 500; // Acceleration of the ship in pixel per second
 
+    const ENEMY_SHIPS_NUM = 55; // Number of normal enemies
     const ENEMY_SHIP_SIZE = 40; // Enemy height in pixels
+    const ENEMY_SHIP_SPEED = 200; // Acceleration of enemies in pixel per second
     const ENEMY_STARTING_X = 10; // Enemies section start x
     const ENEMY_STARTING_Y = 10; // Enemies section start y
 
@@ -29,7 +31,7 @@
     var context = canvas.getContext("2d");
 
     // Set up the game parameters
-    var ship, level, levelText, levelTextAlpha;
+    var ship, level, levelText, levelTextAlpha, enemies;
     newGame();
 
     // Event Hanlders for user inputs
@@ -166,7 +168,36 @@
     }
 
     function spawnEnemies() {
-        // TODO
+        enemies = [];
+        var x = ENEMY_STARTING_X, y = ENEMY_STARTING_Y;
+        for (var i = 1; i < ENEMY_SHIPS_NUM; i++) {
+            enemies.push(newEnemy(x, y, Math.ceil(ENEMY_SHIP_SIZE * 1.2)));
+            x += ENEMY_SHIP_SIZE * 1.2;
+            if (i == 11 || i == 22) {
+                tempColor = "yellow"
+                x = ENEMY_STARTING_X;
+                y += ENEMY_SHIP_SIZE * 1.2;
+            }
+            if(i == 33 || i == 44) {
+                tempColor = "orange"
+                x = ENEMY_STARTING_X;
+                y += ENEMY_SHIP_SIZE * 1.2
+            }
+            enemies.push(newEnemy(x, y, Math.ceil(ENEMY_SHIP_SIZE * 1.2)));
+        }
+    }
+
+    function newEnemy(x, y, radius) {
+        var enemyShip = {
+            x: x,
+            y: y,
+            radius: radius,
+            thrust: {
+                x: 0,
+                y: 0
+            }
+        }
+        return enemyShip;
     }
 
     function update() {
@@ -190,25 +221,44 @@
         // Draw Ship
         drawShip(ship.x, ship.y);
 
-        
-        var tempColor = "white", x = ENEMY_STARTING_X, y = ENEMY_STARTING_Y;
-        for(var i = 1; i <= 55; i ++) {
-            if (i == 1) {
-                drawEnemy(x, y, tempColor);
-                continue;
+    
+        // Draw Enemy Ships
+        var tempColor = "white", x = ENEMY_STARTING_X, y = ENEMY_STARTING_Y, changeDirection = false;
+        // for(var i = 1; i <= ENEMY_SHIPS_NUM; i++) {
+        //     if (i == 1) {
+        //         drawEnemy(x, y, tempColor);
+        //         continue;
+        //     }
+        //     x += ENEMY_SHIP_SIZE * 1.2;
+        //     if (i == 12 || i == 23) {
+        //         tempColor = "yellow"
+        //         x = ENEMY_STARTING_X;
+        //         y += ENEMY_SHIP_SIZE * 1.2;
+        //     }
+        //     if(i == 34 || i == 45) {
+        //         tempColor = "orange"
+        //         x = ENEMY_STARTING_X;
+        //         y += ENEMY_SHIP_SIZE * 1.2
+        //     }
+        //     drawEnemy(x, y, tempColor);
+        // }
+
+        // Move Enemy Ships
+        var enemeyMovementSpeed = ENEMY_SHIP_SPEED / FPS;
+        for (var i = 0; i < enemies.length; i++) {
+
+            // Handle edge of screen
+            if(enemies[i].x < 10 || enemies[i].x >= canvas.width - ENEMY_SHIP_SIZE * 1.2 - ENEMY_STARTING_X) { // Logic for moving left (stopping at edge)
+                changeDirection = true;
+                console.log("Change Directions");
             }
-            x += ENEMY_SHIP_SIZE * 1.2;
-            if (i == 12 || i == 23) {
-                tempColor = "yellow"
-                x = ENEMY_STARTING_X;
-                y += ENEMY_SHIP_SIZE * 1.2;
+            if(changeDirection) {
+                enemeyMovementSpeed = -enemies[i].thrust.x;
+                changeDirection = false;
             }
-            if(i == 34 || i == 45) {
-                tempColor = "orange"
-                x = ENEMY_STARTING_X;
-                y += ENEMY_SHIP_SIZE * 1.2
-            }
-            drawEnemy(x, y, tempColor);
+                enemies[i].thrust.x = ENEMY_SHIP_SPEED / FPS;
+                enemies[i].x += enemeyMovementSpeed; // Actual Moving part
+                drawEnemy(enemies[i].x, enemies[i].y,"white");
         }
     }
 
