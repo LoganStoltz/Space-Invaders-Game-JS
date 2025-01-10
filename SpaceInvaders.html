@@ -10,7 +10,7 @@
 </head>
 
 <body>
-    <canvas id="gameCanvas" width="1000" height="800"></canvas>
+    <canvas id="gameCanvas" width="800" height="800"></canvas>
     <script>
 
     /************* CONSTANTS *************/
@@ -200,6 +200,7 @@
         return enemyShip;
     }
 
+    var enemyMovementSpeed = ENEMY_SHIP_SPEED / FPS;
     function update() {
     
         // Draw background (space)
@@ -221,47 +222,41 @@
         // Draw Ship
         drawShip(ship.x, ship.y);
 
-    
-        // Draw Enemy Ships
-        var tempColor = "white", x = ENEMY_STARTING_X, y = ENEMY_STARTING_Y, changeDirection = false;
-        // for(var i = 1; i <= ENEMY_SHIPS_NUM; i++) {
-        //     if (i == 1) {
-        //         drawEnemy(x, y, tempColor);
-        //         continue;
-        //     }
-        //     x += ENEMY_SHIP_SIZE * 1.2;
-        //     if (i == 12 || i == 23) {
-        //         tempColor = "yellow"
-        //         x = ENEMY_STARTING_X;
-        //         y += ENEMY_SHIP_SIZE * 1.2;
-        //     }
-        //     if(i == 34 || i == 45) {
-        //         tempColor = "orange"
-        //         x = ENEMY_STARTING_X;
-        //         y += ENEMY_SHIP_SIZE * 1.2
-        //     }
-        //     drawEnemy(x, y, tempColor);
-        // }
-
         // Move Enemy Ships
-        var enemeyMovementSpeed = ENEMY_SHIP_SPEED / FPS;
+        var reverseDirection;
         for (var i = 0; i < enemies.length; i++) {
-
             // Handle edge of screen
             if(enemies[i].x < 10 || enemies[i].x >= canvas.width - ENEMY_SHIP_SIZE * 1.2 - ENEMY_STARTING_X) { // Logic for moving left (stopping at edge)
-                changeDirection = true;
-                console.log("Change Directions");
+                reverseDirection = true;
+                enemies.y += 1;
+                break;
             }
-            if(changeDirection) {
-                enemeyMovementSpeed = -enemies[i].thrust.x;
-                changeDirection = false;
+        }
+
+        if (reverseDirection) {
+            enemyMovementSpeed = -enemyMovementSpeed * 1.05;
+            for (var i = 0; i < enemies.length; i++) {
+                enemies[i].y += ENEMY_SHIP_SIZE * 0.5; // Move enemies down slightly
             }
-                enemies[i].thrust.x = ENEMY_SHIP_SPEED / FPS;
-                enemies[i].x += enemeyMovementSpeed; // Actual Moving part
-                drawEnemy(enemies[i].x, enemies[i].y,"white");
+        }
+
+
+        /* THIS IS SPAWNING TWO OF EACH BOX */
+        /***** NEEDS TO BE FIXED *****/
+        // Update all enemies' positions
+        for (var i = 0; i < enemies.length; i++) {
+            if (i < 22) { // First row
+                tempColor = "white";
+            } else if (i < 66) { // Second and third rows
+                tempColor = "yellow";
+            } else { // Fourth and fifth rows
+                tempColor = "orange";
+            }
+
+            enemies[i].x += enemyMovementSpeed; // Actual Moving part
+            drawEnemy(enemies[i].x, enemies[i].y, tempColor);
         }
     }
-
     </script>
 </body>
 
