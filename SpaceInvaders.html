@@ -170,20 +170,19 @@
     function spawnEnemies() {
         enemies = [];
         var x = ENEMY_STARTING_X, y = ENEMY_STARTING_Y;
-        for (var i = 1; i < ENEMY_SHIPS_NUM; i++) {
+        for (var i = 0; i < ENEMY_SHIPS_NUM; i++) {
             enemies.push(newEnemy(x, y, Math.ceil(ENEMY_SHIP_SIZE * 1.2)));
             x += ENEMY_SHIP_SIZE * 1.2;
-            if (i == 11 || i == 22) {
+            if (i == 10 || i == 21) {
                 tempColor = "yellow"
                 x = ENEMY_STARTING_X;
                 y += ENEMY_SHIP_SIZE * 1.2;
             }
-            if(i == 33 || i == 44) {
+            if(i == 32 || i == 43) {
                 tempColor = "orange"
                 x = ENEMY_STARTING_X;
                 y += ENEMY_SHIP_SIZE * 1.2
             }
-            enemies.push(newEnemy(x, y, Math.ceil(ENEMY_SHIP_SIZE * 1.2)));
         }
     }
 
@@ -201,6 +200,7 @@
     }
 
     var enemyMovementSpeed = ENEMY_SHIP_SPEED / FPS;
+    var enemyMoveDown = ENEMY_SHIP_SIZE * 0.5;
     function update() {
     
         // Draw background (space)
@@ -228,31 +228,38 @@
             // Handle edge of screen
             if(enemies[i].x < 10 || enemies[i].x >= canvas.width - ENEMY_SHIP_SIZE * 1.2 - ENEMY_STARTING_X) { // Logic for moving left (stopping at edge)
                 reverseDirection = true;
-                enemies.y += 1;
                 break;
+            }
+            if(enemies[i].y >= 600) {
+                enemyMovementSpeed = 0;
+                enemyMoveDown = 0;
             }
         }
 
         if (reverseDirection) {
             enemyMovementSpeed = -enemyMovementSpeed * 1.05;
             for (var i = 0; i < enemies.length; i++) {
-                enemies[i].y += ENEMY_SHIP_SIZE * 0.5; // Move enemies down slightly
+                enemies[i].y += enemyMoveDown; // Move enemies down slightly
             }
+            
         }
+        
 
-
-        /* THIS IS SPAWNING TWO OF EACH BOX */
-        /***** NEEDS TO BE FIXED *****/
         // Update all enemies' positions
-        for (var i = 0; i < enemies.length; i++) {
-            if (i < 22) { // First row
+        for (var i = 0; i <= enemies.length; i++) {
+            if (i < 11) { // First row
                 tempColor = "white";
-            } else if (i < 66) { // Second and third rows
+            } else if (i < 33) { // Second and third rows
                 tempColor = "yellow";
             } else { // Fourth and fifth rows
                 tempColor = "orange";
             }
 
+            /* Testing for when all edge enemies are dead
+            if(i == 10 || i == 21 || i == 32 || i == 43 || i == 54) 
+            {
+                continue;
+            }*/
             enemies[i].x += enemyMovementSpeed; // Actual Moving part
             drawEnemy(enemies[i].x, enemies[i].y, tempColor);
         }
