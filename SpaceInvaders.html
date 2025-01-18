@@ -158,6 +158,10 @@
         }
     }
 
+    function distanceBetweenPoints(x1, y1, x2, y2) {
+        return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+    }
+
     function newGame() {
         level = 0;
         ship = newShip();
@@ -226,6 +230,22 @@
         return enemyShip;
     }
 
+
+    function destroyEnemy(index) {
+        var x = enemies[index].x;
+        var y = enemies[index].y;
+        var radius = enemies[index].radius;
+
+        // Destroy Enemy
+        enemies.splice(index, 1);
+
+        // New Level when no more enemies
+        if (enemies.length == 0) {
+            //level++;
+            newLevel();
+        }
+    }
+
     var enemyMovementSpeed = ENEMY_SHIP_SPEED / FPS;
     var enemyMoveDown = ENEMY_SHIP_SIZE * 0.5;
     function update() {
@@ -268,9 +288,33 @@
                 ship.lasers.splice(i, 1);
                 continue;
             }
-
-
         }
+
+        // Detect laser hits on Asteroids
+        var enemyX, enemyY, enemyRadius, laserX, laserY;
+        for (var i = enemies.length - 1; i >= 0; i--) {
+
+            // Grab the asteroid properties
+            enemyX = enemies[i].x;
+            enemyY = enemies[i].y;
+            enemyRadius = enemies[i].radius;
+            
+            // Loop over the lasers array
+            for (var j = ship.lasers.length - 1; j >= 0; j--) {
+
+                // Grab Laser properties
+                laserX = ship.lasers[j].x;
+                laserY = ship.lasers[j].y;
+
+                // Detect Asteroid Collision
+                if (distanceBetweenPoints(enemyX, enemyY, laserX, laserY) < enemyRadius) {
+                    // Remove the Asteroid and activate the laser explosion
+                    destroyEnemy(i);
+                    ship.lasers.splice(j, 1); 
+                    break;
+                }
+            }
+        } 
 
         // Move Enemy Ships
         var reverseDirection;
