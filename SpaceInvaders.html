@@ -25,6 +25,11 @@
     const ENEMY_STARTING_X = 10; // Enemies section start x
     const ENEMY_STARTING_Y = 10; // Enemies section start y
 
+    const LASERS_MAX = 20; // The max amount of lasers on screen
+    const LASER_SPEED = 500; // Speed of lasers in pixels per second
+    const LASER_MAX_DISTANCE = 500; // Distance the lasers can move in pixels
+    
+
     /************* GAME SETUP *************/
     /** @type {HTMLCanvasElement} */
     var canvas = document.getElementById("gameCanvas");
@@ -50,6 +55,8 @@
             radius: SHIP_SIZE / 2,
             thrustingLeft: false,
             thrustingRight: false,
+            lasers: [],
+            canShoot: true,
             thrust: {
                 x: 0
             }
@@ -126,7 +133,7 @@
     function keyDown(/** @type {KeyboardEvent}*/ event) {
         switch(event.keyCode){
             case 32: // space bar (Shoot laser)
-                //shootLaser();
+                shootPlayerLaser();
                 break;
             case 37: // left arrow (move ship left)
                 ship.thrustingLeft = true;
@@ -140,8 +147,9 @@
     function keyUp(/** @type {KeyboardEvent}*/ event) {
         switch(event.keyCode){
             case 32: // space bar (allow shooting again)
+                ship.canShoot = true;
                 break;
-                case 37: // left arrow (move ship left)
+            case 37: // left arrow (move ship left)
                 ship.thrustingLeft = false;
                 break;
             case 39: // right arrow (rotate ship right)
@@ -161,6 +169,25 @@
         levelText = "Level " + (level + 1);
         levelTextAlpha = 1.0;
         spawnEnemies();
+    }
+
+    function shootPlayerLaser() {
+        // Create laser object
+        if(ship.canShoot && ship.lasers.length < LASERS_MAX) {
+            ship.lasers.push({ // shoot from the tip of the gun
+                x: ship.x * ship.radius,
+                y: ship.y * ship.radius,
+                yVelocity: LASER_SPEED / FPS,
+                distanceTraveled: 0
+            });
+        }
+
+        // Prevent further shooting
+        ship.canShoot = false;
+    }
+
+    function drawPlayerLasers() {
+
     }
 
     function spawnDefences() {
@@ -222,6 +249,27 @@
         // Draw Ship
         drawShip(ship.x, ship.y);
 
+        // Move and draw lasers
+        for (var i = ship.lasers.length - 1; i >= 0; i--) {
+            // Move the laser
+            ship.lasers[i].y -= ship.lasers[i].yVelocity;
+
+            // Check distance traveled
+            ship.lasers[i].distanceTraveled += ship.lasers[i].yVelocity;
+
+            // Remove the laser if it has traveled too far
+            if (ship.lasers[i].distanceTraveled > LASER_MAX_DISTANCE) {
+                ship.lasers.splice(i, 1);
+                continue;
+            }
+
+            // Draw the laser
+            context.fillStyle = "salmon";
+            context.beginPath();
+            context.arc(ship.lasers[i].x, ship.lasers[i].y, SHIP_SIZE / 15, 0, Math.PI * 2, false);
+            context.fill();
+        }
+
         // Move Enemy Ships
         var reverseDirection;
         for (var i = 0; i < enemies.length; i++) {
@@ -267,4 +315,4 @@
     </script>
 </body>
 
-</html>
+</html> 
