@@ -21,13 +21,13 @@
 
     const ENEMY_SHIPS_NUM = 55; // Number of normal enemies
     const ENEMY_SHIP_SIZE = 40; // Enemy height in pixels
-    const ENEMY_SHIP_SPEED = 200; // Acceleration of enemies in pixel per second
+    const ENEMY_SHIP_SPEED = 75; // Acceleration of enemies in pixel per second
     const ENEMY_STARTING_X = 10; // Enemies section start x
     const ENEMY_STARTING_Y = 10; // Enemies section start y
 
     const LASERS_MAX = 20; // The max amount of lasers on screen
     const LASER_SPEED = 500; // Speed of lasers in pixels per second
-    const LASER_MAX_DISTANCE = 500; // Distance the lasers can move in pixels
+    const LASER_MAX_DISTANCE = 800; // Distance the lasers can move in pixels
     
 
     /************* GAME SETUP *************/
@@ -175,9 +175,9 @@
         // Create laser object
         if(ship.canShoot && ship.lasers.length < LASERS_MAX) {
             ship.lasers.push({ // shoot from the tip of the gun
-                x: ship.x * ship.radius,
-                y: ship.y * ship.radius,
-                yVelocity: LASER_SPEED / FPS,
+                x: ship.x,
+                y: ship.y - ship.radius,
+                yVelocity: -LASER_SPEED / FPS,
                 distanceTraveled: 0
             });
         }
@@ -252,10 +252,16 @@
         // Move and draw lasers
         for (var i = ship.lasers.length - 1; i >= 0; i--) {
             // Move the laser
-            ship.lasers[i].y -= ship.lasers[i].yVelocity;
+            ship.lasers[i].y += ship.lasers[i].yVelocity;
+            
+            // Draw the laser
+            context.fillStyle = "white";
+            context.beginPath();
+            context.arc(ship.lasers[i].x, ship.lasers[i].y, ship.radius / 5, 0, Math.PI * 2, false);
+            context.fill(); 
 
             // Check distance traveled
-            ship.lasers[i].distanceTraveled += ship.lasers[i].yVelocity;
+            ship.lasers[i].distanceTraveled +=  Math.abs(ship.lasers[i].yVelocity);
 
             // Remove the laser if it has traveled too far
             if (ship.lasers[i].distanceTraveled > LASER_MAX_DISTANCE) {
@@ -263,11 +269,7 @@
                 continue;
             }
 
-            // Draw the laser
-            context.fillStyle = "salmon";
-            context.beginPath();
-            context.arc(ship.lasers[i].x, ship.lasers[i].y, SHIP_SIZE / 15, 0, Math.PI * 2, false);
-            context.fill();
+
         }
 
         // Move Enemy Ships
