@@ -19,6 +19,9 @@
     const SHIP_SIZE = 30; // Ship height in pixel
     const SHIP_SPEED = 500; // Acceleration of the ship in pixel per second
 
+    const NUMBER_OF_DEFENCES = 4; // Number of barrier defences
+    const DEFENCE_SIZE = 30; // Defence size in pixels
+ 
     const ENEMY_SHIPS_NUM = 55; // Number of normal enemies
     const ENEMY_SHIP_SIZE = 40; // Enemy height in pixels
     const ENEMY_SHIP_SPEED = 75; // Acceleration of enemies in pixel per second
@@ -51,7 +54,7 @@
     function newShip() {
         return{
             x: canvas.width / 2,
-            y: canvas.height * 0.9,
+            y: canvas.height * 0.94,
             radius: SHIP_SIZE / 2,
             thrustingLeft: false,
             thrustingRight: false,
@@ -130,6 +133,54 @@
         context.fill(); 
     }
 
+    function drawDefence(x, y, color) {
+        context.strokeStyle = color;
+        context.lineWidth = DEFENCE_SIZE / 20;
+        context.fillStyle = color;
+        context.beginPath();
+        context.moveTo( 
+            x + 0,
+            y + 0
+        );
+        context.lineTo(
+            x + DEFENCE_SIZE*3,
+            y + 0
+        );
+        context.lineTo(
+            x + DEFENCE_SIZE*3,
+            y + DEFENCE_SIZE*2
+        );
+        context.lineTo(
+            x + DEFENCE_SIZE*2,
+            y + DEFENCE_SIZE*2
+        );
+        context.lineTo(
+            x + DEFENCE_SIZE*2,
+            y + DEFENCE_SIZE
+        );
+        context.lineTo(
+            x + DEFENCE_SIZE,
+            y + DEFENCE_SIZE
+        );
+        context.lineTo(
+            x + DEFENCE_SIZE*1,
+            y + DEFENCE_SIZE*2
+        );
+        context.lineTo(
+            x + 0,
+            y + DEFENCE_SIZE*2
+        );
+        context.closePath();
+        context.fill(); 
+    }
+
+    function drawDefences() {
+        for (var i = 0; i < defences.length; i++) {
+            var defense = defences[i];
+            drawDefence(defense.x, defense.y, "#39FF14"); // Use the drawDefences function
+        }
+    }
+
     function keyDown(/** @type {KeyboardEvent}*/ event) {
         switch(event.keyCode){
             case 32: // space bar (Shoot laser)
@@ -165,8 +216,8 @@
     function newGame() {
         level = 0;
         ship = newShip();
-        spawnDefences();
         newLevel();
+        spawnDefences();
     }
 
     function newLevel() {
@@ -190,13 +241,25 @@
         ship.canShoot = false;
     }
 
-    function drawPlayerLasers() {
-
+    function drawPlayerLasers(index) {
+        context.fillStyle = "white";
+        context.beginPath();
+        context.arc(ship.lasers[index].x, ship.lasers[index].y, ship.radius / 5, 0, Math.PI * 2, false);
+        context.fill(); 
     }
 
     function spawnDefences() {
-        // TODO
+        defences = [];
+        var totalWidth = canvas.width; // Total canvas width
+        var gap = (totalWidth - NUMBER_OF_DEFENCES * DEFENCE_SIZE * 3) / (NUMBER_OF_DEFENCES + 1); // Calculate spacing
+
+        for (var i = 0; i < NUMBER_OF_DEFENCES; i++) {
+            var x = gap + i * (DEFENCE_SIZE * 3 + gap); // Calculate X position for each defense
+            var y = canvas.height*0.81; // Fixed Y position
+            defences.push({ x: x, y: y }); // Store defense positions
+        }
     }
+
 
     function spawnEnemies() {
         enemies = [];
@@ -266,6 +329,9 @@
         }
         ship.x += ship.thrust.x; // Actual Moving part
 
+        // Draw Defences
+        drawDefences();
+
         // Draw Ship
         drawShip(ship.x, ship.y);
 
@@ -275,10 +341,7 @@
             ship.lasers[i].y += ship.lasers[i].yVelocity;
             
             // Draw the laser
-            context.fillStyle = "white";
-            context.beginPath();
-            context.arc(ship.lasers[i].x, ship.lasers[i].y, ship.radius / 5, 0, Math.PI * 2, false);
-            context.fill(); 
+            drawPlayerLasers(i);
 
             // Check distance traveled
             ship.lasers[i].distanceTraveled +=  Math.abs(ship.lasers[i].yVelocity);
@@ -290,11 +353,11 @@
             }
         }
 
-        // Detect laser hits on Asteroids
+        // Detect laser hits on enemies
         var enemyX, enemyY, enemyRadius, laserX, laserY;
         for (var i = enemies.length - 1; i >= 0; i--) {
 
-            // Grab the asteroid properties
+            // Grab the enemies properties
             enemyX = enemies[i].x;
             enemyY = enemies[i].y;
             enemyRadius = enemies[i].radius;
@@ -306,9 +369,9 @@
                 laserX = ship.lasers[j].x;
                 laserY = ship.lasers[j].y;
 
-                // Detect Asteroid Collision
+                // Detect Enemy Collision
                 if (distanceBetweenPoints(enemyX, enemyY, laserX, laserY) < enemyRadius) {
-                    // Remove the Asteroid and activate the laser explosion
+                    // Remove the Enemy and activate the laser explosion
                     destroyEnemy(i);
                     ship.lasers.splice(j, 1); 
                     break;
